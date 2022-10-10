@@ -18,7 +18,7 @@ const sketch = ({ context, width, height }) => {
   let x, y, w, h, fill, stroke, blend;
 
   const num_shapes = 40;
-  const degrees = -30;
+  const degrees = 30;
 
   const rects = [];
 
@@ -27,20 +27,31 @@ const sketch = ({ context, width, height }) => {
     random.pick(risoColors),
   ];
 
+  triWidths = [
+    random.range(80, 300),
+  ];
+
   const bgColor = random.pick(risoColors).hex
 
   const mask = {
     radius: width * 0.4,
-    sides: 3,
+    sides: 300,
     x: width * 0.5,
-    y: height * 0.58, // This 0.8 is a hack
+    y: height * 0.5, // This 0.8 is a hack
   }
 
   for (let i = 0; i < num_shapes; i++) {
+    // x = random.range(0, width / 2 + width / 4);
     x = random.range(0, width);
     y = random.range(0, height);
-    w = random.range(600, width);
-    h = random.range(40, 200);
+
+    // w = random.range(600, width);
+    // w = random.range(10, 300);
+    w = random.pick(triWidths);
+
+    // h = random.range(40, 200);
+    h = random.range(200, 500);
+    // h = 400;
 
     fill = random.pick(rectColors).hex;
     stroke = random.pick(rectColors).hex;
@@ -75,7 +86,9 @@ const sketch = ({ context, width, height }) => {
 
       context.globalCompositeOperation = blend;
 
-      drawSkewedRect({ context, w, h, degrees });
+      // drawSkewedRect({ context, w, h, degrees });
+      // drawPolygon({ context, radius: x, sides: 5 });
+      drawIsosceles({  context, w, h, angle: 0 });
 
       shadowColor = Color.offsetHSL(fill, 0, 0, -20);
       shadowColor.rgba[3] = 0.5;
@@ -127,6 +140,24 @@ const drawSkewedRect = ({ context, w = 600, h = 200, degrees = -45 }) => {
   context.lineTo(rx, ry);
   context.lineTo(rx, ry + h);
   context.lineTo(0, h);
+  context.closePath();
+  context.stroke();
+
+  context.restore();
+}
+
+const drawIsosceles = ({ context, w = 600, h = 200, degrees = -45}) => {
+  // const angle = math.degToRad(degrees);
+  // const rx = Math.cos(angle) * w;
+  // const ry = Math.sin(angle) * w;
+
+  context.save();
+  context.translate(w * 0.5, h * 0.5);
+
+  context.beginPath();
+  context.moveTo(0, 0);
+  context.lineTo(w, 0);
+  context.lineTo(w / 2, -1 * h);
   context.closePath();
   context.stroke();
 
