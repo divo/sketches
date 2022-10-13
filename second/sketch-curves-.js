@@ -9,8 +9,8 @@ const settings = {
 };
 
 const sketch = ({ width, height }) => {
-  const cols = 72;
-  const rows = 8;
+  const cols = 10;
+  const rows = 10;
   const numCells = cols * rows;
 
   // grid
@@ -32,7 +32,7 @@ const sketch = ({ width, height }) => {
 
   let n;
   let frequency = 0.002;
-  let amplitude = 90;
+  let amplitude = 40;
   let color;
 
   const colors = colormap({
@@ -46,6 +46,7 @@ const sketch = ({ width, height }) => {
     x = (i % cols) * cw;
     y = Math.floor(i / cols) * ch;
 
+    // Noise used to get lineWidths and colors, not used for drawing anything
     n = random.noise2D(x, y, frequency, amplitude);
 //    x += n;
 //    y += n;
@@ -67,6 +68,7 @@ const sketch = ({ width, height }) => {
     context.lineWidth = 4;
 
     points.forEach(point => {
+      // The amplitude is roughly the same size as the cell height
       n = random.noise2D(point.ix + frame * 3, point.iy, frequency, amplitude);
       point.x = point.ix + n;
       point.y = point.iy + n;
@@ -75,7 +77,6 @@ const sketch = ({ width, height }) => {
     let lastx, lasty;
 
     for (let r = 0; r < rows; r++) {
-
       for (let c = 0; c < cols - 1; c ++ ){
         const curr = points[r * cols + c + 0]; // +0 to make clear this is current point. Not clear
         const next = points[r * cols + c + 1];
@@ -93,14 +94,13 @@ const sketch = ({ width, height }) => {
         context.strokeStyle = curr.color;
 
         context.moveTo(lastx, lasty);
-        context.quadraticCurveTo(curr.x, curr.y, mx, my);
+        context.rect(curr.x, curr.y, cw, ch);
 
         context.stroke();
 
-        lastx = mx - c / cols * 250;
-        lasty =  my - r / rows * 250;
+        lastx = mx //- c / cols * 250;
+        lasty = my //- r / rows * 250;
       }
-
     }
 
     points.forEach(point => {
