@@ -9,8 +9,8 @@ const settings = {
 };
 
 const sketch = ({ width, height }) => {
-  const cols = 72;
-  const rows = 8;
+  const cols = 80;
+  const rows = 80;
   const numCells = cols * rows;
 
   // grid
@@ -67,6 +67,9 @@ const sketch = ({ width, height }) => {
     context.lineWidth = 4;
 
     points.forEach(point => {
+      // how the fuck does this produce a gradient of values over time????
+      // Ok, so without understanding the math it does create a sequence of numbers
+      // that are ordered in some way
       n = random.noise2D(point.ix + frame * 3, point.iy, frequency, amplitude);
       point.x = point.ix + n;
       point.y = point.iy + n;
@@ -75,11 +78,13 @@ const sketch = ({ width, height }) => {
     let lastx, lasty;
 
     for (let r = 0; r < rows; r++) {
-
       for (let c = 0; c < cols - 1; c ++ ){
         const curr = points[r * cols + c + 0]; // +0 to make clear this is current point. Not clear
         const next = points[r * cols + c + 1];
 
+        // This is a technique to string together multiple curves into one seamless one. 
+        // It works by treating the mid point between two points as the anchor points
+        // and the points themselves as the control points.
         const mx = curr.x + (next.x - curr.x) * 0.5; // Current position + half the distance to the next point
         const my = curr.y + (next.y - curr.y) * 0.5; // Current position + half the distance to the next point
 
@@ -98,7 +103,7 @@ const sketch = ({ width, height }) => {
         context.stroke();
 
         lastx = mx - c / cols * 250;
-        lasty =  my - r / rows * 250;
+        lasty =  my  - r / rows * 250;
       }
 
     }
