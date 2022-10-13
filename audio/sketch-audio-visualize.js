@@ -119,13 +119,14 @@ const createAudio = () => {
   sourceNode.connect(audioContext.destination);
 
   analyserNode = audioContext.createAnalyser();
+  //  analyserNode.fftSize = 512;
   analyserNode.fftSize = 512;
   analyserNode.smoothingTimeConstant = 0.9;
   sourceNode.connect(analyserNode);
 
 
-  mindDB = analyserNode.minDecibles;
-  maxDB = analyserNode.maxDecibles;
+  minDB = analyserNode.minDecibels;
+  maxDB = analyserNode.maxDecibels;
 
   audioData = new Float32Array(analyserNode.frequencyBinCount);
 };
