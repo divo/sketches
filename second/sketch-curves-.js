@@ -4,12 +4,13 @@ const math = require('canvas-sketch-util/math');
 const colormap = require('colormap');
 
 const settings = {
-  dimensions: [ 1080, 1080 ]
+  dimensions: [ 1080, 1080 ],
+  animate: true,
 };
 
 const sketch = ({ width, height }) => {
-  const cols = 12;
-  const rows = 100;
+  const cols = 72;
+  const rows = 8;
   const numCells = cols * rows;
 
   // grid
@@ -35,7 +36,7 @@ const sketch = ({ width, height }) => {
   let color;
 
   const colors = colormap({
-    colormap: 'magma',
+    colormap: 'salinity',
     nshades: amplitude,
   });
 
@@ -90,8 +91,8 @@ const sketch = ({ width, height }) => {
 
         context.stroke();
 
-        lastx = mx;
-        lasty =  my;
+        lastx = mx - c / cols * 250;
+        lasty =  my - r / rows * 250;
       }
 
     }
