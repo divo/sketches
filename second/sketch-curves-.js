@@ -28,7 +28,7 @@ const sketch = ({ width, height }) => {
   let x, y;
 
   let n;
-  let frequency = 1;
+  let frequency = 0.002;
   let amplitude = 90;
 
   for (let i = 0; i < numCells; i++) {
@@ -55,18 +55,23 @@ const sketch = ({ width, height }) => {
     for (let r = 0; r < rows; r++) {
       context.beginPath();
 
-      for (let c = 0; c < cols; c ++ ){
-        const point = points[r * cols + c];
+      for (let c = 0; c < cols - 1; c ++ ){
+        const curr = points[r * cols + c + 0]; // +0 to make clear this is current point. Not clear
+        const next = points[r * cols + c + 1];
 
-        if (!c) context.moveTo(point.x, point.y);
-        else context.lineTo(point.x, point.y);
+        const mx = curr.x + (next.x - curr.x) * 0.5; // Current position + half the distance to the next point
+        const my = curr.y + (next.y - curr.y) * 0.5; // Current position + half the distance to the next point
+
+        if (c == 0) context.moveTo(curr.x, curr.y);
+        else if (c == cols.length -2) context.quadraticCurveTo(curr.x, curr.y, next.x, next.y);
+        else context.quadraticCurveTo(curr.x, curr.y, mx, my);
       }
 
       context.stroke();
     }
 
     points.forEach(point => {
-      point.draw(context);
+//      point.draw(context);
     });
 
     context.restore();
