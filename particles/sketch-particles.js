@@ -51,20 +51,6 @@ const sketch = ({ width, height, canvas }) => {
     dotRadius = (1 - eases.quadOut(i / numCircles)) * fitRadius;
   }
 
-  /*
-  for (let i = 0; i < 200; i ++) {
-    x = width * 0.5;
-    y = height * 0.5;
-
-    random.insideCircle(400, pos);
-    x += pos[0];
-    y += pos[1];
-
-    particle= new Particle({ x, y });
-    particles.push(particle);
-  }
-  */
-
   return ({ context, width, height }) => {
     context.fillStyle = 'black';
     context.fillRect(0, 0, width, height);
