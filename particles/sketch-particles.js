@@ -18,9 +18,18 @@ const colors = colormap({
 });
 
 let elCanvas;
+let imgA;
 
 const sketch = ({ width, height, canvas }) => {
   let x, y, particle, radius;
+
+  const imgACanvas = document.createElement('canvas');
+  const imgAContext = imgACanvas.getContext('2d');
+
+  imgACanvas.width = imgA.width;
+  imgACanvas.height = imgA.height;
+
+  imgAContext.drawImage(imgA, 0, 0);
 
   let pos = [];
 
@@ -62,6 +71,8 @@ const sketch = ({ width, height, canvas }) => {
     context.fillStyle = 'black';
     context.fillRect(0, 0, width, height);
 
+//    context.drawImage(imgACanvas, 0, 0);
+
     particles.sort((a, b) => a.scale - b.scale);
 
     particles.forEach(particle => {
@@ -95,7 +106,22 @@ const onMouseUp = () => {
   cursor.y = 9999;
 }
 
-canvasSketch(sketch, settings);
+const loadImage = async (url) => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject();
+    img.src = url;
+  });
+};
+
+const start = async () => {
+  imgA = await loadImage('img/1.jpg');
+
+  canvasSketch(sketch, settings);
+}
+
+start();
 
 class Particle {
   constructor({ x, y, radius = 10 }){
