@@ -62,6 +62,8 @@ const sketch = ({ width, height, canvas }) => {
     context.fillStyle = 'black';
     context.fillRect(0, 0, width, height);
 
+    particles.sort((a, b) => a.scale - b.scale);
+
     particles.forEach(particle => {
       particle.update();
       particle.draw(context);
