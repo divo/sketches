@@ -3,6 +3,7 @@ const random = require('canvas-sketch-util/random');
 const eases = require('eases');
 const math= require('canvas-sketch-util/math');
 const colormap = require('colormap');
+const interpolate = require('color-interpolate');
 
 const settings = {
   dimensions: [ 1080, 1080 ],
@@ -18,7 +19,7 @@ const colors = colormap({
 });
 
 let elCanvas;
-let imgA;
+let imgA, imgB;
 
 const sketch = ({ width, height, canvas }) => {
   let x, y, particle, radius;
@@ -31,12 +32,19 @@ const sketch = ({ width, height, canvas }) => {
 
   imgAContext.drawImage(imgA, 0, 0);
 
-  let pos = [];
+  const imgAData = imgAContext.getImageData(0, 0, imgA.width, imgA.height).data;
 
-  const numCircles = 15;
-  const gapCircle = 8;
-  const gapDot = 4;
-  let dotRadius = 12;
+  const imgBCanvas = document.createElement('canvas');
+  const imgBContext = imgBCanvas.getContext('2d');
+
+  imgBCanvas.width = imgB.width;
+  imgBCanvas.height = imgB.height;
+imgBContext.drawImage(imgB, 0, 0); const imgBData = imgBContext.getImageData(0, 0, imgB.width, imgB.height).data; let pos = [];
+
+  const numCircles = 30;
+  const gapCircle = 4;
+  const gapDot = 2;
+  let dotRadius = 8;
   let cirRadius = 0;
   const fitRadius = dotRadius;
 
@@ -47,6 +55,7 @@ const sketch = ({ width, height, canvas }) => {
     const circumference = Math.PI * 2 * cirRadius;
     const numFit = i ? Math.floor(circumference / (fitRadius * 2 + gapDot)) : 1;
     const fitSlice = Math.PI * 2 / numFit;
+    let ix, iy, idx, r, g, b, colA, colB, colMap;
 
     for (let j = 0; j < numFit; j++) {
       const theta = fitSlice * j;
@@ -57,9 +66,32 @@ const sketch = ({ width, height, canvas }) => {
       x += width * 0.5;
       y += height * 0.5;
 
-      radius = dotRadius;
+      // Position of pixel in image we want to sample
+      ix = Math.floor((x / width) * imgA.width);
+      iy = Math.floor((y / height) * imgA.height);
+      idx = (iy * imgA.width + ix) * 4; // Image is a big array
 
-      particle = new Particle({x, y, radius});
+      r = imgAData[idx + 0];
+      g = imgAData[idx + 1];
+      b = imgAData[idx + 2];
+      colA = `rgb(${r}, ${g}, ${b})`
+
+      // radius = dotRadius;
+      radius = math.mapRange(b, 0, 255, 1, 12);
+
+      // Position of pixel in image we want to sample
+      bx = Math.floor((x / width) * imgB.width);
+      by = Math.floor((y / height) * imgB.height);
+      bdx = (iy * imgB.width + ix) * 4; // Image is a big array
+
+      r = imgBData[bdx + 0];
+      g = imgBData[bdx + 1];
+      b = imgBData[bdx + 2];
+      colB = `rgb(${r}, ${g}, ${b})`
+
+      colMap = interpolate([colA, colB]);
+
+      particle = new Particle({x, y, radius, colMap});
       particles.push(particle);
     }
 
@@ -116,7 +148,8 @@ const loadImage = async (url) => {
 };
 
 const start = async () => {
-  imgA = await loadImage('img/1.jpg');
+  imgA = await loadImage('img/2.jpg');
+  imgB = await loadImage('img/bal.jpg');
 
   canvasSketch(sketch, settings);
 }
@@ -124,7 +157,7 @@ const start = async () => {
 start();
 
 class Particle {
-  constructor({ x, y, radius = 10 }){
+  constructor({ x, y, radius = 10, colA, colMap }){
     // Position
     this.x = x;
     this.y = y;
@@ -143,7 +176,8 @@ class Particle {
 
     this.radius = radius;
     this.scale = 1;
-    this.color = colors[0];
+    this.colMap = colMap;
+    this.color = colMap[0];
 
     this.minDist = random.range(100, 200);
     this.pushFactor = random.range(0.01, 0.02);
@@ -165,8 +199,10 @@ class Particle {
 
     this.scale = math.mapRange(dd, 0, 200, 1, 5);
 
-    idxColor = Math.floor(math.mapRange(dd, 0, 200, 0, colors.length - 1, true));
-    this.color = colors[idxColor];
+    // idxColor = Math.floor(math.mapRange(dd, 0, 200, 0, colors.length - 1, true));
+    // this.color = colors[idxColor];
+
+    this.color = this.colMap(math.mapRange(dd, 0, 200, 0, 1, true));
 
     // Push force
     dx = this.x - cursor.x;
